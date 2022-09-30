@@ -35,3 +35,7 @@ def validation(epoch, validation_dataloader, model, device):
         print(
             f"Val Epoch: {epoch} | Avg Loss: {val_loss:.4f} | Accuracy: {val_acc}"
         )
+
+        #save val accuracy
+
+        return(val_acc)
