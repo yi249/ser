@@ -1,5 +1,5 @@
 import typer
-
+from ser.infer import infers
 main = typer.Typer()
 
 
@@ -7,7 +7,6 @@ main = typer.Typer()
 def train():
     print("This is where the training code will go")
 
-
 @main.command()
 def infer():
-    pass
+    infers()
