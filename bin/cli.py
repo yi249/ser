@@ -10,6 +10,7 @@ from ser.constants import RESULTS_DIR
 from ser.data import train_dataloader, val_dataloader, test_dataloader
 from ser.params import Params, save_params
 from ser.transforms import transforms, normalize
+from ser.ascii import generate_ascii_art
 
 main = typer.Typer()
 
@@ -59,8 +60,15 @@ def train(
 
 
 @main.command()
-def infer():
-    run_path = Path("./path/to/one/of/your/training/runs")
+def infer(
+    name: str = typer.Option(
+        ..., "-n", "--name", help="Name of experiment to load."
+    ),
+    timestamp: str = typer.Option(
+        ..., "-t", help="Timestamp of experiment to load."
+    )
+):
+    run_path = RESULTS_DIR / name / timestamp
     label = 6
 
     # TODO load the parameters from the run_path so we can print them out!
@@ -82,24 +90,3 @@ def infer():
     pixels = images[0][0]
     print(generate_ascii_art(pixels))
     print(f"This is a {pred}")
-
-
-def generate_ascii_art(pixels):
-    ascii_art = []
-    for row in pixels:
-        line = []
-        for pixel in row:
-            line.append(pixel_to_char(pixel))
-        ascii_art.append("".join(line))
-    return "\n".join(ascii_art)
-
-
-def pixel_to_char(pixel):
-    if pixel > 0.99:
-        return "O"
-    elif pixel > 0.9:
-        return "o"
-    elif pixel > 0:
-        return "."
-    else:
-        return " "
