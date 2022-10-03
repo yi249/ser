@@ -68,16 +68,18 @@ def infer(
     ),
     timestamp: str = typer.Option(
         ..., "-t", help="Timestamp of experiment to load."
+    ),
+    label: int = typer.Option(
+        ..., "-l", help="Label to use."
     )
 ):
     run_path = RESULTS_DIR / name / timestamp
-    label = 6
 
     # print parameters
     with open (run_path / "params.json", "r") as f:
         parameters = json.loads(f.read())
-
     print(parameters)
+
     # select image to run inference for
     images = load_image(label)
 
