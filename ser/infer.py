@@ -8,4 +8,4 @@ def infer(model, images):
     certainty = max(list(torch.exp(output)[0]))
     pixels = images[0][0]
     print(generate_ascii_art(pixels))
-    print(f"This is a {pred}")
+    print(f"Prediction: {pred}, with confidence: {certainty}")

@@ -4,6 +4,7 @@ from pathlib import Path
 import typer
 import torch
 import git
+import json
 
 from ser.train import train as run_train
 from ser.constants import RESULTS_DIR
@@ -72,8 +73,11 @@ def infer(
     run_path = RESULTS_DIR / name / timestamp
     label = 6
 
-    # TODO load the parameters from the run_path so we can print them out!
+    # print parameters
+    with open (run_path / "params.json", "r") as f:
+        parameters = json.loads(f.read())
 
+    print(parameters)
     # select image to run inference for
     images = load_image(label)
 
