@@ -10,8 +10,8 @@ from ser.constants import RESULTS_DIR
 from ser.data import train_dataloader, val_dataloader, test_dataloader
 from ser.params import Params, save_params
 from ser.transforms import transforms, normalize
-from ser.ascii import generate_ascii_art
 from ser.image import load_image
+from ser.infer import infer as run_infer
 
 main = typer.Typer()
 
@@ -81,10 +81,4 @@ def infer(
     model = torch.load(run_path / "model.pt")
 
     # run inference
-    model.eval()
-    output = model(images)
-    pred = output.argmax(dim=1, keepdim=True)[0].item()
-    certainty = max(list(torch.exp(output)[0]))
-    pixels = images[0][0]
-    print(generate_ascii_art(pixels))
-    print(f"This is a {pred}")
+    run_infer(model, images)
