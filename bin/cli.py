@@ -11,6 +11,7 @@ from ser.data import train_dataloader, val_dataloader, test_dataloader
 from ser.params import Params, save_params
 from ser.transforms import transforms, normalize
 from ser.ascii import generate_ascii_art
+from ser.image import load_image
 
 main = typer.Typer()
 
@@ -74,10 +75,7 @@ def infer(
     # TODO load the parameters from the run_path so we can print them out!
 
     # select image to run inference for
-    dataloader = test_dataloader(1, transforms(normalize))
-    images, labels = next(iter(dataloader))
-    while labels[0].item() != label:
-        images, labels = next(iter(dataloader))
+    images = load_image(label)
 
     # load the model
     model = torch.load(run_path / "model.pt")
