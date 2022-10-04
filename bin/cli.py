@@ -30,6 +30,9 @@ def train(
     learning_rate: float = typer.Option(
         0.01, "-l", "--learning-rate", help="Learning rate for the model."
     ),
+    flip_rate: float = typer.Option(
+        0.0, "-f", "--flip-rate", help="Proportion of images to flip."
+    )
 ):
     """Run the training algorithm."""
     repo = git.Repo(search_parent_directories=True)
@@ -54,8 +57,8 @@ def train(
     run_train(
         run_path,
         params,
-        train_dataloader(params.batch_size, transforms(normalize)),
-        val_dataloader(params.batch_size, transforms(normalize)),
+        train_dataloader(params.batch_size, transforms(normalize(),flip(p=flip_rate))),
+        val_dataloader(params.batch_size, transforms(normalize(),flip(p=flip_rate))),
         device,
     )
 
@@ -80,10 +83,6 @@ def infer(
 
 
 def _select_test_image(label, flip_im):
-    # TODO `ts` is a list of transformations that will be applied to the loaded
-    # image. This works... but in order to add a transformation, or change one,
-    # we now have to come and edit the code... which sucks. What if we could
-    # configure the transformations via the cli?
     ts = [normalize]
     if flip_im:
         ts.append(flip)

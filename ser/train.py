@@ -4,6 +4,12 @@ import torch.nn.functional as F
 
 from ser.model import Net
 
+import visdom
+
+vis = visdom.Visdom()
+
+loss_plot = vis.line(X=torch.zeros([1]), Y=torch.zeros([1]))
+accuracy_plot = vis.line(X=torch.zeros([1]), Y=torch.zeros([1]))
 
 def train(run_path, params, train_dataloader, val_dataloader, device):
     # setup model
@@ -22,6 +28,7 @@ def train(run_path, params, train_dataloader, val_dataloader, device):
 
 
 def _train_batch(model, dataloader, optimizer, epoch, device):
+    correct = 0
     for i, (images, labels) in enumerate(dataloader):
         images, labels = images.to(device), labels.to(device)
         model.train()
@@ -30,10 +37,16 @@ def _train_batch(model, dataloader, optimizer, epoch, device):
         loss = F.nll_loss(output, labels)
         loss.backward()
         optimizer.step()
+        pred = output.argmax(dim=1, keepdim=True)
+        correct += pred.eq(labels.view_as(pred)).sum().item()
         print(
             f"Train Epoch: {epoch} | Batch: {i}/{len(dataloader)} "
             f"| Loss: {loss.item():.4f}"
         )
+        vis.line(X=torch.ones((1,1)).cpu()*i+(epoch*60),Y=torch.Tensor([loss]).unsqueeze(0).cpu(),win=loss_plot, update='append')
+    accuracy = correct / len(dataloader.dataset)
+    vis.line(X=torch.ones((1,1)).cpu()*epoch,Y=torch.Tensor([accuracy]).unsqueeze(0).cpu(),win=accuracy_plot, update='append', name="train")
+
 
 
 @torch.no_grad()
@@ -50,3 +63,4 @@ def _val_batch(model, dataloader, device, epoch):
     val_loss /= len(dataloader.dataset)
     accuracy = correct / len(dataloader.dataset)
     print(f"Val Epoch: {epoch} | Avg Loss: {val_loss:.4f} | Accuracy: {accuracy}")
+    vis.line(X=torch.ones((1,1)).cpu()*epoch,Y=torch.Tensor([accuracy]).unsqueeze(0).cpu(),win=accuracy_plot, update='append', name="validation")
