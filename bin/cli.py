@@ -1,5 +1,6 @@
 from datetime import datetime
 from pathlib import Path
+from xmlrpc.client import Boolean
 
 import typer
 import torch
@@ -65,22 +66,27 @@ def infer(
         ..., "-p", "--path", help="Path to run from which you want to infer."
     ),
     label: int = typer.Option(
-        6, "-l", "--label", help="Label of image to show to the model"
+        6, "-l", "--label", help="Label of image to show to the model."
     ),
+    flip_im: bool = typer.Option(
+        False, "-f", "--flip", help="Whether to flip image or not."
+    )
 ):
     """Run the inference code"""
     params = load_params(run_path)
     model = torch.load(run_path / "model.pt")
-    image = _select_test_image(label)
+    image = _select_test_image(label, flip_im)
     run_infer(params, model, image, label)
 
 
-def _select_test_image(label):
+def _select_test_image(label, flip_im):
     # TODO `ts` is a list of transformations that will be applied to the loaded
     # image. This works... but in order to add a transformation, or change one,
     # we now have to come and edit the code... which sucks. What if we could
     # configure the transformations via the cli?
-    ts = [normalize, flip]
+    ts = [normalize]
+    if flip_im:
+        ts.append(flip)
     dataloader = test_dataloader(1, transforms(*ts))
     images, labels = next(iter(dataloader))
     while labels[0].item() != label:
